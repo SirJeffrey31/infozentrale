@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nachlieferungs-Rotation</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚚</text></svg>">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',-apple-system,sans-serif;background:linear-gradient(135deg,#f5f7fa,#e4e8ec);min-height:100vh;color:#333}.header{background:#fff;padding:20px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.1);position:sticky;top:0;z-index:100}.header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}.header h1{font-size:22px;color:#2d3748;display:flex;align-items:center;gap:10px}.refresh-btn{width:36px;height:36px;border-radius:50%;border:none;background:#f0f0f0;color:#4ade80;font-size:20px;cursor:pointer}.header .subtitle{font-size:13px;color:#718096}.container{padding:15px;max-width:600px;margin:0 auto}.next-up{background:#fff;border-radius:16px;padding:20px;margin-bottom:20px;box-shadow:0 4px 15px rgba(0,0,0,.08)}.next-up-label{font-size:14px;color:#718096;margin-bottom:12px;font-weight:500}.next-up-card{background:linear-gradient(135deg,#f59e0b,#d97706);border-radius:12px;padding:20px;display:flex;align-items:center;justify-content:center;gap:12px}.next-up-card .arrow{font-size:24px;color:rgba(255,255,255,.8)}.next-up-card .name{font-size:32px;font-weight:700;color:#fff}.next-up-action{margin-top:15px;text-align:center}.next-up-action .badge{display:inline-block;background:#d1fae5;color:#059669;padding:8px 20px;border-radius:20px;font-size:14px;font-weight:500}.next-up-action .badge.has-kunde{background:#fee2e2;color:#dc2626}.list-section{background:#fff;border-radius:16px;padding:20px;box-shadow:0 4px 15px rgba(0,0,0,.08);margin-bottom:20px}.list-section h2{font-size:14px;color:#718096;margin-bottom:15px;font-weight:500}.ranking-list{display:flex;flex-direction:column;gap:8px}.ranking-item{display:flex;align-items:center;padding:12px 15px;background:#f9fafb;border-radius:10px}.ranking-item.current{background:#fef3c7;border:2px solid #f59e0b}.ranking-item.abwesend{opacity:.4}.ranking-item.has-kunde{background:#fef2f2;border:2px solid #fca5a5}.ranking-item .position{width:30px;font-size:16px;font-weight:600;color:#9ca3af}.ranking-item.current .position{color:#d97706}.ranking-item .name{flex:1;font-size:16px;font-weight:500;color:#374151}.ranking-item .stat{font-size:11px;color:#9ca3af;margin-left:auto;margin-right:10px}.ranking-item .status-badge{font-size:11px;padding:4px 10px;border-radius:12px;font-weight:600}.ranking-item .status-badge.aktuell{background:#fbbf24;color:#78350f}.ranking-item .status-badge.abwesend{background:#e5e7eb;color:#6b7280}.ranking-item .status-badge.nachlieferung{background:#fecaca;color:#991b1b}.kunde-info-mobile{width:100%;margin-top:8px;padding:8px 12px;background:#fee2e2;border-radius:8px;font-size:13px;color:#991b1b}.rules-section{background:#fff;border-radius:16px;padding:20px;box-shadow:0 4px 15px rgba(0,0,0,.08);margin-bottom:20px}.rules-section h2{font-size:14px;color:#718096;margin-bottom:15px;display:flex;align-items:center;gap:8px}.rule-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #f3f4f6}.rule-item:last-child{border-bottom:none}.rule-item .rule-icon{font-size:18px;width:24px}.rule-item .rule-content h3{font-size:14px;font-weight:600;margin-bottom:3px}.rule-item .rule-content h3.blue{color:#2563eb}.rule-item .rule-content h3.green{color:#059669}.rule-item .rule-content h3.orange{color:#d97706}.rule-item .rule-content h3.pink{color:#db2777}.rule-item .rule-content h3.red{color:#dc2626}.rule-item .rule-content h3.purple{color:#7c3aed}.rule-item .rule-content p{font-size:12px;color:#6b7280;line-height:1.4}.footer{background:linear-gradient(135deg,#d1fae5,#a7f3d0);border-radius:12px;padding:15px;text-align:center;margin-bottom:20px}.footer .motto{font-size:16px;font-weight:600;color:#065f46}.footer .subtitle{font-size:12px;color:#047857;margin-top:4px}.alert-toast{position:fixed;top:80px;left:15px;right:15px;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;padding:15px 20px;border-radius:12px;box-shadow:0 10px 30px rgba(239,68,68,.4);transform:translateY(-150%);transition:transform .4s;z-index:1000}.alert-toast.show{transform:translateY(0)}.alert-toast .alert-title{font-weight:600;font-size:14px;margin-bottom:5px}.alert-toast .alert-content{font-size:18px;font-weight:700}.live-indicator{position:fixed;bottom:15px;right:15px;background:#fff;padding:8px 15px;border-radius:20px;box-shadow:0 2px 10px rgba(0,0,0,.1);font-size:12px;display:flex;align-items:center;gap:8px}.live-dot{width:8px;height:8px;background:#4ade80;border-radius:50%;animation:pulse 2s infinite}@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-top"><h1><span>🚚</span> Nachlieferungs-Rotation</h1><button class="refresh-btn" onclick="location.reload()">↻</button></div>
+        <div class="subtitle">Gunterswiler AG – Fair & Transparent</div>
+    </header>
+    <div class="container">
+        <div class="next-up">
+            <div class="next-up-label">Nächster an der Reihe:</div>
+            <div class="next-up-card"><span class="arrow">→</span><span class="name" id="nextName">Laden...</span><span class="arrow">←</span></div>
+            <div class="next-up-action"><span class="badge" id="nextBadge">Bereit für Nachlieferung</span></div>
+        </div>
+        <div class="list-section"><h2>Reihenfolge:</h2><div class="ranking-list" id="rankingList"></div></div>
+        <div class="rules-section">
+            <h2>ℹ️ Spielregeln</h2>
+            <div class="rule-item"><span class="rule-icon">📋</span><div class="rule-content"><h3 class="blue">Regel 1: Rotation gilt immer</h3><p>Wer oben steht, macht die nächste Nachlieferung.</p></div></div>
+            <div class="rule-item"><span class="rule-icon">✅</span><div class="rule-content"><h3 class="green">Regel 2: Nach der Fahrt</h3><p>Wer gefahren ist, wandert ans Ende der Liste.</p></div></div>
+            <div class="rule-item"><span class="rule-icon">🏠</span><div class="rule-content"><h3 class="orange">Regel 3: Bei Abwesenheit</h3><p>Wer krank/frei ist, wird übersprungen.</p></div></div>
+            <div class="rule-item"><span class="rule-icon">💬</span><div class="rule-content"><h3 class="pink">Regel 4: Proaktiv sein</h3><p>Platz 1-3 fragt vor Feierabend: "Kommt noch was?"</p></div></div>
+            <div class="rule-item"><span class="rule-icon">⚠️</span><div class="rule-content"><h3 class="red">Regel 5: Mehrere Nachlieferungen</h3><p>Platz 1 nimmt die erste, Platz 2 die zweite, etc.</p></div></div>
+            <div class="rule-item"><span class="rule-icon">🔒</span><div class="rule-content"><h3 class="purple">Regel 6: Liste ist heilig</h3><p>Nur die Geschäftsleitung darf ändern.</p></div></div>
+        </div>
+        <div class="footer"><div class="motto">🤝 Teamwork macht's möglich!</div><div class="subtitle">Fair. Transparent. Für alle.</div></div>
+    </div>
+    <div class="alert-toast" id="alertToast"><div class="alert-title">🚨 Neue Nachlieferung!</div><div class="alert-content" id="alertContent"></div></div>
+    <div class="live-indicator"><span class="live-dot"></span>Live</div>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script>
+        const firebaseConfig={apiKey:"AIzaSyAJIPZpX0ML_ahRqYGaysybxBHpbWKYspI",authDomain:"infozentrale-7b690.firebaseapp.com",projectId:"infozentrale-7b690",storageBucket:"infozentrale-7b690.firebasestorage.app",messagingSenderId:"634159156585",appId:"1:634159156585:web:deb48910b3f42d4e5081f8"};
+        firebase.initializeApp(firebaseConfig);const db=firebase.firestore();
+        let lastKundenState={},statistik={};
+        db.collection('settings').doc('statistik').onSnapshot(doc=>{if(doc.exists)statistik=doc.data();});
+        db.collection('settings').doc('rangliste').onSnapshot(doc=>{if(doc.exists)renderRangliste(doc.data().list||[]);});
+        function renderRangliste(rangliste){
+            const list=document.getElementById('rankingList'),nextName=document.getElementById('nextName'),nextBadge=document.getElementById('nextBadge');
+            if(!rangliste||rangliste.length===0){list.innerHTML='<div style="text-align:center;padding:20px;color:#999">Keine Daten</div>';return;}
+            const active=rangliste.filter(r=>!r.excluded);
+            const first=active.find(r=>!r.abwesend);
+            if(first){nextName.textContent=first.fahrer;if(first.kunde){nextBadge.textContent='🚨 → '+first.kunde;nextBadge.classList.add('has-kunde');}else{nextBadge.textContent='Bereit für Nachlieferung ✓';nextBadge.classList.remove('has-kunde');}}
+            checkForNewKunden(active);
+            list.innerHTML=active.map((r,i)=>{
+                const isFirst=i===0,current=isFirst?'current':'',abw=r.abwesend?'abwesend':'',hasK=r.kunde&&!r.abwesend?'has-kunde':'';
+                let badge='';if(isFirst&&!r.abwesend)badge='<span class="status-badge aktuell">AKTUELL</span>';else if(r.abwesend)badge='<span class="status-badge abwesend">ABWESEND</span>';else if(r.kunde)badge='<span class="status-badge nachlieferung">FÄHRT</span>';
+                const stat=statistik[r.fahrer]||0;
+                const kundeHtml=r.kunde&&!r.abwesend?`<div class="kunde-info-mobile">🚨 ${r.kunde}</div>`:'';
+                return`<div class="ranking-item ${current} ${abw} ${hasK}"><span class="position">${i+1}.</span><span class="name">${r.fahrer}</span><span class="stat">${stat} NL</span>${badge}</div>${kundeHtml}`;
+            }).join('');
+        }
+        function checkForNewKunden(rangliste){rangliste.forEach(r=>{const had=lastKundenState[r.fahrer],has=r.kunde;if(has&&has!==had){showAlert(r.fahrer+' → '+r.kunde);if(navigator.vibrate)navigator.vibrate([200,100,200]);}lastKundenState[r.fahrer]=has;});}
+        function showAlert(content){const t=document.getElementById('alertToast');document.getElementById('alertContent').textContent=content;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),8000);}
+    </script>
+</body>
+</html>
