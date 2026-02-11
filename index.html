@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gunterswiler AG - Info-Zentrale</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); height: 100vh; color: #fff; overflow: hidden; }
+        
+        .header { background: rgba(255,255,255,0.1); padding: 8px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #4ade80; height: 60px; }
+        .logo { font-size: 22px; font-weight: bold; color: #4ade80; }
+        .logo span { color: #fff; }
+        .logo-subtitle { font-size: 11px; font-weight: normal; opacity: 0.7; }
+        .header-center { display: flex; align-items: center; gap: 30px; }
+        .weather { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.08); padding: 10px 20px; border-radius: 12px; }
+        .weather-icon { font-size: 40px; }
+        .weather-info { text-align: left; }
+        .weather-temp { font-size: 26px; font-weight: 600; }
+        .weather-desc { font-size: 12px; opacity: 0.7; }
+        .weather-forecast { display: flex; gap: 12px; margin-left: 15px; padding-left: 20px; border-left: 1px solid rgba(255,255,255,0.2); }
+        .forecast-item { text-align: center; font-size: 12px; opacity: 0.7; }
+        .forecast-item .temp { font-size: 14px; font-weight: 600; opacity: 1; }
+        .mode-indicator { background: rgba(255,255,255,0.1); padding: 8px 15px; border-radius: 8px; font-size: 12px; cursor: pointer; transition: all 0.2s; }
+        .mode-indicator:hover { background: rgba(255,255,255,0.2); }
+        .mode-indicator .mode-name { font-weight: 600; color: #4ade80; }
+        .mode-indicator .hint { font-size: 9px; opacity: 0.6; display: block; }
+        .header-right { text-align: right; }
+        .clock { font-size: 32px; font-weight: 300; letter-spacing: 2px; }
+        .date { font-size: 12px; opacity: 0.7; }
+
+        .main-content { display: none; gap: 15px; padding: 15px; height: calc(100vh - 60px); }
+        .main-content.active { display: grid; }
+        .layout-touren { grid-template-columns: 1fr 350px; }
+        .layout-nachlieferung { grid-template-columns: 1fr 1fr 300px; }
+
+        .section { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; overflow: hidden; }
+        .section-title { font-size: 16px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+        .section-title .icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+
+        .tours-section .icon { background: #3b82f6; }
+        .tour-grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(3, 1fr); gap: 12px; flex: 1; }
+        .tour-card { border-radius: 12px; padding: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; transition: transform 0.2s; }
+        .tour-card:hover { transform: scale(1.02); }
+        .tour-card.status-kommissionieren { background: linear-gradient(135deg, rgba(239, 68, 68, 0.5), rgba(185, 28, 28, 0.5)); border: 3px solid #ef4444; }
+        .tour-card.status-ready { background: linear-gradient(135deg, rgba(34, 197, 94, 0.5), rgba(22, 163, 74, 0.5)); border: 3px solid #22c55e; }
+        .tour-card.status-unterwegs { background: linear-gradient(135deg, rgba(59, 130, 246, 0.5), rgba(37, 99, 235, 0.5)); border: 3px solid #3b82f6; }
+        .tour-card.status-erledigt { background: linear-gradient(135deg, rgba(107, 114, 128, 0.3), rgba(75, 85, 99, 0.3)); border: 3px solid #6b7280; }
+        .tour-card.empty { background: rgba(255,255,255,0.02); border: 2px dashed rgba(255,255,255,0.1); }
+        .tour-name { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+        .driver-name { font-size: 22px; opacity: 0.95; margin-bottom: 10px; }
+        .tour-status-badge { margin-top: 8px; padding: 8px 20px; border-radius: 20px; font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        .badge-kommissionieren { background: #ef4444; color: #fff; }
+        .badge-ready { background: #22c55e; color: #fff; }
+        .badge-unterwegs { background: #3b82f6; color: #fff; }
+        .badge-erledigt { background: #6b7280; color: #fff; }
+        .lieferschein-notice { margin-top: 12px; font-size: 16px; font-weight: 700; color: #fff; background: rgba(0,0,0,0.4); padding: 10px 18px; border-radius: 12px; animation: pulse-notice 1.5s infinite; text-transform: uppercase; }
+        @keyframes pulse-notice { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+        .ranking-section .icon { background: #f59e0b; }
+        .ranking-grid { display: flex; flex-direction: column; gap: 8px; flex: 1; overflow-y: auto; }
+        .ranking-card { border-radius: 10px; padding: 15px; display: flex; align-items: center; gap: 15px; transition: all 0.3s; }
+        .ranking-card.rank-1 { background: linear-gradient(135deg, rgba(245, 158, 11, 0.4), rgba(217, 119, 6, 0.4)); border: 2px solid #f59e0b; }
+        .ranking-card.rank-2 { background: linear-gradient(135deg, rgba(156, 163, 175, 0.3), rgba(107, 114, 128, 0.3)); border: 2px solid #9ca3af; }
+        .ranking-card.rank-3 { background: linear-gradient(135deg, rgba(180, 83, 9, 0.3), rgba(146, 64, 14, 0.3)); border: 2px solid #b45309; }
+        .ranking-card.rank-other { background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); }
+        .ranking-card.abwesend { opacity: 0.4; border-style: dashed; }
+        .rank-badge { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; flex-shrink: 0; }
+        .rank-1 .rank-badge { background: #f59e0b; color: #000; }
+        .rank-2 .rank-badge { background: #9ca3af; color: #000; }
+        .rank-3 .rank-badge { background: #b45309; color: #fff; }
+        .rank-other .rank-badge { background: rgba(255,255,255,0.1); }
+        .ranking-info { flex: 1; }
+        .ranking-info .ranking-driver-name { font-size: 20px; font-weight: 600; }
+        .kunde-info { margin-top: 6px; padding: 6px 10px; background: rgba(239, 68, 68, 0.3); border-radius: 6px; border-left: 3px solid #ef4444; font-size: 13px; }
+        .kunde-info .kunde-name { font-weight: 600; }
+        .abwesend-badge { font-size: 12px; background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 6px; }
+
+        .unterwegs-section .icon { background: #3b82f6; }
+        .unterwegs-grid { display: flex; flex-direction: column; gap: 6px; flex: 1; overflow-y: auto; }
+        .unterwegs-card { background: linear-gradient(135deg, rgba(59, 130, 246, 0.4), rgba(37, 99, 235, 0.4)); border: 2px solid #3b82f6; border-radius: 8px; padding: 10px 15px; display: flex; align-items: center; gap: 12px; }
+        .unterwegs-card .tour-icon { font-size: 20px; }
+        .unterwegs-card .tour-info { flex: 1; }
+        .unterwegs-card .tour-name { font-size: 16px; font-weight: 700; }
+        .unterwegs-card .driver-name { font-size: 13px; opacity: 0.9; }
+        .unterwegs-card .status-badge { background: #3b82f6; padding: 4px 10px; border-radius: 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+        
+        .feierabend-message { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; }
+        .feierabend-message .icon { font-size: 80px; margin-bottom: 20px; }
+        .feierabend-message h2 { font-size: 32px; color: #4ade80; margin-bottom: 10px; }
+        .feierabend-message p { font-size: 18px; opacity: 0.7; }
+
+        .news-section .icon { background: #ec4899; }
+        
+        /* NEWS CAROUSEL - Rotating single card */
+        .news-carousel { 
+            flex: 1; 
+            position: relative; 
+            overflow: hidden; 
+            border-radius: 12px;
+        }
+        .news-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.08);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            flex-direction: column;
+            transform: translateX(100%);
+            transition: transform 0.6s ease-in-out;
+        }
+        .news-slide.active {
+            transform: translateX(0);
+        }
+        .news-slide.exit {
+            transform: translateX(-100%);
+        }
+        .news-slide .slide-image {
+            height: 33.33%;
+            background: #2a2a4a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border-radius: 12px 12px 0 0;
+        }
+        .news-slide .slide-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .news-slide .slide-image .placeholder {
+            font-size: 60px;
+            opacity: 0.3;
+        }
+        .news-slide .slide-content {
+            height: 66.66%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .news-slide .slide-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+        .news-slide .slide-text {
+            font-size: 17px;
+            opacity: 0.85;
+            line-height: 1.6;
+            color: #ccc;
+        }
+        
+        /* WEATHER SLIDE */
+        .weather-slide .slide-image {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            flex-direction: column;
+            padding: 15px;
+        }
+        .weather-slide .weather-date {
+            font-size: 18px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+        .weather-slide .weather-main {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .weather-slide .weather-icon-large {
+            font-size: 60px;
+        }
+        .weather-slide .weather-temp-large {
+            font-size: 48px;
+            font-weight: 600;
+        }
+        .weather-slide .weather-desc-large {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .weather-slide .slide-content {
+            padding: 15px 20px;
+            display: flex;
+            flex-direction: column;
+            height: 66.66%;
+        }
+        .weather-slide .weather-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr 1fr;
+            gap: 10px;
+            flex: 1;
+            padding-right: 5px;
+        }
+        .weather-slide .weather-detail-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .weather-slide .weather-detail-item .detail-icon {
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+        .weather-slide .weather-detail-item .detail-text {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        .weather-slide .weather-detail-item .detail-label {
+            font-size: 11px;
+            opacity: 0.6;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .weather-slide .weather-detail-item .detail-value {
+            font-weight: 600;
+            font-size: 15px;
+        }
+        
+        /* Slide indicators */
+        .slide-indicators {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+            z-index: 10;
+        }
+        .slide-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transition: all 0.3s;
+        }
+        .slide-indicator.active {
+            background: #4ade80;
+            width: 24px;
+            border-radius: 4px;
+        }
+        
+        .loading { display: flex; align-items: center; justify-content: center; height: 100%; opacity: 0.5; font-size: 16px; }
+
+        /* PAUSEN-OVERLAY */
+        .pause-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 50%, #16213e 100%);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+        }
+        .pause-overlay.active { display: flex; }
+        .pause-overlay .pause-icon { font-size: 150px; margin-bottom: 40px; animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
+        .pause-overlay h1 { font-size: 72px; color: #4ade80; margin-bottom: 20px; text-shadow: 0 0 30px rgba(74, 222, 128, 0.5); }
+        .pause-overlay p { font-size: 36px; opacity: 0.8; margin-bottom: 40px; }
+        .pause-overlay .pause-time { font-size: 48px; font-weight: 300; opacity: 0.6; }
+        .pause-overlay .pause-progress { width: 400px; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; margin-top: 30px; overflow: hidden; }
+        .pause-overlay .pause-progress-bar { height: 100%; background: linear-gradient(90deg, #4ade80, #22c55e); border-radius: 4px; transition: width 1s linear; }
+
+        /* BIRTHDAY OVERLAY */
+        .birthday-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            z-index: 9998;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+        }
+        .birthday-overlay.active { display: flex; }
+        .birthday-overlay .confetti { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; }
+        .birthday-overlay .confetti span { position: absolute; width: 15px; height: 15px; animation: confetti-fall linear infinite; }
+        .birthday-overlay .confetti span:nth-child(1) { left: 10%; background: #ff6b6b; animation-duration: 4s; animation-delay: 0s; }
+        .birthday-overlay .confetti span:nth-child(2) { left: 20%; background: #feca57; animation-duration: 5s; animation-delay: 0.5s; }
+        .birthday-overlay .confetti span:nth-child(3) { left: 30%; background: #48dbfb; animation-duration: 4.5s; animation-delay: 1s; }
+        .birthday-overlay .confetti span:nth-child(4) { left: 40%; background: #ff9ff3; animation-duration: 5.5s; animation-delay: 0.2s; }
+        .birthday-overlay .confetti span:nth-child(5) { left: 50%; background: #54a0ff; animation-duration: 4s; animation-delay: 0.8s; }
+        .birthday-overlay .confetti span:nth-child(6) { left: 60%; background: #5f27cd; animation-duration: 5s; animation-delay: 1.2s; }
+        .birthday-overlay .confetti span:nth-child(7) { left: 70%; background: #00d2d3; animation-duration: 4.5s; animation-delay: 0.3s; }
+        .birthday-overlay .confetti span:nth-child(8) { left: 80%; background: #ff6b6b; animation-duration: 5s; animation-delay: 0.7s; }
+        .birthday-overlay .confetti span:nth-child(9) { left: 90%; background: #feca57; animation-duration: 4s; animation-delay: 1.5s; }
+        .birthday-overlay .confetti span:nth-child(10) { left: 5%; background: #1dd1a1; animation-duration: 5.5s; animation-delay: 0.1s; }
+        .birthday-overlay .confetti span:nth-child(11) { left: 15%; background: #ff9ff3; animation-duration: 4.2s; animation-delay: 0.9s; }
+        .birthday-overlay .confetti span:nth-child(12) { left: 25%; background: #48dbfb; animation-duration: 5.2s; animation-delay: 0.4s; }
+        .birthday-overlay .confetti span:nth-child(13) { left: 35%; background: #ff6b6b; animation-duration: 4.8s; animation-delay: 1.1s; }
+        .birthday-overlay .confetti span:nth-child(14) { left: 45%; background: #feca57; animation-duration: 4.3s; animation-delay: 0.6s; }
+        .birthday-overlay .confetti span:nth-child(15) { left: 55%; background: #54a0ff; animation-duration: 5.3s; animation-delay: 1.3s; }
+        .birthday-overlay .confetti span:nth-child(16) { left: 65%; background: #5f27cd; animation-duration: 4.6s; animation-delay: 0.2s; }
+        .birthday-overlay .confetti span:nth-child(17) { left: 75%; background: #00d2d3; animation-duration: 5.1s; animation-delay: 0.8s; }
+        .birthday-overlay .confetti span:nth-child(18) { left: 85%; background: #1dd1a1; animation-duration: 4.4s; animation-delay: 1.4s; }
+        .birthday-overlay .confetti span:nth-child(19) { left: 95%; background: #ff9ff3; animation-duration: 5.4s; animation-delay: 0.5s; }
+        .birthday-overlay .confetti span:nth-child(20) { left: 50%; background: #48dbfb; animation-duration: 4.7s; animation-delay: 1s; }
+        @keyframes confetti-fall { 0% { top: -10%; transform: rotate(0deg) scale(1); opacity: 1; } 100% { top: 110%; transform: rotate(720deg) scale(0.5); opacity: 0.5; } }
+        .birthday-overlay .cake-icon { font-size: 180px; margin-bottom: 30px; animation: bounce 1s ease-in-out infinite; filter: drop-shadow(0 0 40px rgba(255,255,255,0.5)); }
+        @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        .birthday-overlay h1 { font-size: 90px; color: #fff; margin-bottom: 20px; text-shadow: 0 0 40px rgba(255,255,255,0.8), 0 4px 8px rgba(0,0,0,0.3); }
+        .birthday-overlay .birthday-name { font-size: 120px; font-weight: 800; color: #feca57; text-shadow: 0 0 60px rgba(254,202,87,0.8), 0 6px 12px rgba(0,0,0,0.4); animation: glow 2s ease-in-out infinite; margin-bottom: 30px; }
+        @keyframes glow { 0%, 100% { text-shadow: 0 0 60px rgba(254,202,87,0.8), 0 6px 12px rgba(0,0,0,0.4); } 50% { text-shadow: 0 0 80px rgba(254,202,87,1), 0 0 120px rgba(254,202,87,0.6), 0 6px 12px rgba(0,0,0,0.4); } }
+        .birthday-overlay .birthday-wishes { font-size: 48px; color: #fff; opacity: 0.9; margin-top: 20px; }
+        .birthday-overlay .birthday-emoji { font-size: 60px; margin-top: 30px; animation: party 0.5s ease-in-out infinite; }
+        @keyframes party { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+
+        /* NEWS TICKER */
+        .news-ticker {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            background: linear-gradient(90deg, #dc2626, #b91c1c);
+            z-index: 9000;
+            overflow: hidden;
+            box-shadow: 0 -4px 20px rgba(220, 38, 38, 0.4);
+        }
+        .news-ticker.active { display: flex; align-items: center; }
+        .news-ticker .ticker-label {
+            background: #fff;
+            color: #dc2626;
+            padding: 0 20px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            flex-shrink: 0;
+        }
+        .news-ticker .ticker-content {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+        .news-ticker .ticker-text {
+            display: inline-block;
+            white-space: nowrap;
+            padding-left: 100%;
+            animation: ticker-scroll 20s linear infinite;
+            font-size: 22px;
+            font-weight: 600;
+            color: #fff;
+        }
+        @keyframes ticker-scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* Sound Button */
+        .sound-enable-btn { position: fixed; bottom: 20px; right: 20px; background: rgba(74, 222, 128, 0.2); border: 2px solid #4ade80; color: #4ade80; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; z-index: 100; transition: all 0.3s; }
+        .sound-enable-btn:hover { background: rgba(74, 222, 128, 0.4); }
+        .sound-enable-btn.enabled { background: #4ade80; color: #000; }
+    </style>
+</head>
+<body>
+    <div class="pause-overlay" id="pauseOverlay">
+        <div class="pause-icon">☕</div>
+        <h1>Wohlverdiente Pause!</h1>
+        <p>Gönnt euch eine kurze Erholung 💪</p>
+        <div class="pause-time" id="pauseTime">--:--</div>
+        <div class="pause-progress"><div class="pause-progress-bar" id="pauseProgressBar" style="width: 0%"></div></div>
+    </div>
+
+    <div class="birthday-overlay" id="birthdayOverlay">
+        <div class="confetti">
+            <span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="cake-icon">🎂</div>
+        <h1>🎉 Happy Birthday! 🎉</h1>
+        <div class="birthday-name" id="birthdayName">Name</div>
+        <div class="birthday-wishes">Alles Gute zum Geburtstag! 🥳</div>
+        <div class="birthday-emoji">🎈🎁🎊🎉🎈</div>
+    </div>
+
+    <div class="news-ticker" id="newsTicker">
+        <div class="ticker-label">📢 WICHTIG</div>
+        <div class="ticker-content">
+            <span class="ticker-text" id="tickerText"></span>
+        </div>
+    </div>
+
+    <header class="header">
+        <div class="logo">GUNTERSWILER <span>AG</span><div class="logo-subtitle">Info-Zentrale</div></div>
+        <div class="header-center">
+            <div class="weather">
+                <span class="weather-icon" id="weatherIcon">⛅</span>
+                <div class="weather-info">
+                    <div class="weather-temp" id="weatherTemp">--°C</div>
+                    <div class="weather-desc" id="weatherDesc">Laden...</div>
+                </div>
+                <div class="weather-forecast" id="weatherForecast"></div>
+            </div>
+            <div class="mode-indicator" onclick="toggleModeManual()">
+                <span class="mode-name" id="modeName">Laden...</span>
+                <span class="hint">▶ Klicken zum Wechseln</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="clock" id="clock">--:--</div>
+            <div class="date" id="date">Laden...</div>
+        </div>
+    </header>
+
+    <main class="main-content layout-touren" id="layoutTouren">
+        <section class="section tours-section">
+            <h2 class="section-title"><span class="icon">🚚</span>Touren Status</h2>
+            <div class="tour-grid" id="tourGrid"><div class="loading">Laden...</div></div>
+        </section>
+        <section class="section news-section">
+            <h2 class="section-title"><span class="icon">📢</span>News & Infos</h2>
+            <div class="news-carousel" id="newsCarouselTouren">
+                <div class="loading">Laden...</div>
+            </div>
+            <div class="slide-indicators" id="slideIndicatorsTouren"></div>
+        </section>
+    </main>
+
+    <main class="main-content layout-nachlieferung" id="layoutNachlieferung">
+        <section class="section ranking-section">
+            <h2 class="section-title"><span class="icon">📋</span>Nachlieferungs-Reihenfolge</h2>
+            <div class="ranking-grid" id="rankingGrid"><div class="loading">Laden...</div></div>
+        </section>
+        <section class="section unterwegs-section">
+            <h2 class="section-title"><span class="icon">🚚</span>Touren unterwegs</h2>
+            <div class="unterwegs-grid" id="unterwegsGrid"><div class="loading">Laden...</div></div>
+        </section>
+        <section class="section news-section">
+            <h2 class="section-title"><span class="icon">📢</span>News & Infos</h2>
+            <div class="news-carousel" id="newsCarouselNachlieferung">
+                <div class="loading">Laden...</div>
+            </div>
+            <div class="slide-indicators" id="slideIndicatorsNachlieferung"></div>
+        </section>
+    </main>
+
+    <button class="sound-enable-btn" id="soundBtn" onclick="enableSound()">🔇 Sound aktivieren</button>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script>
+        const firebaseConfig = {apiKey:"AIzaSyAJIPZpX0ML_ahRqYGaysybxBHpbWKYspI",authDomain:"infozentrale-7b690.firebaseapp.com",projectId:"infozentrale-7b690",storageBucket:"infozentrale-7b690.firebasestorage.app",messagingSenderId:"634159156585",appId:"1:634159156585:web:deb48910b3f42d4e5081f8"};
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let manualMode = null, lastResetCheck = null, soundEnabled = false, previousTourenStatus = {}, pauseGongPlayed = false, audioContext = null;
+        let geburtstage = [], termine = [], wiederkehrend = [], birthdayShowing = false, birthdaySongPlaying = false;
+        let newsItems = [], currentSlideIndex = 0, weatherData = null, carouselInterval = null;
+
+        // SOUND FUNKTIONEN
+        function enableSound() {
+            soundEnabled = true;
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            document.getElementById('soundBtn').classList.add('enabled');
+            document.getElementById('soundBtn').innerHTML = '🔊 Sound aktiviert';
+            playDingDong();
+            setTimeout(() => speak('Sound aktiviert'), 1500);
+        }
+        
+        function playDingDong() {
+            if (!soundEnabled || !audioContext) return;
+            const ding = audioContext.createOscillator();
+            const dingGain = audioContext.createGain();
+            ding.connect(dingGain);
+            dingGain.connect(audioContext.destination);
+            ding.frequency.value = 830;
+            ding.type = 'sine';
+            dingGain.gain.setValueAtTime(0.5, audioContext.currentTime);
+            dingGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
+            ding.start(audioContext.currentTime);
+            ding.stop(audioContext.currentTime + 0.8);
+            
+            setTimeout(() => {
+                const dong = audioContext.createOscillator();
+                const dongGain = audioContext.createGain();
+                dong.connect(dongGain);
+                dongGain.connect(audioContext.destination);
+                dong.frequency.value = 622;
+                dong.type = 'sine';
+                dongGain.gain.setValueAtTime(0.5, audioContext.currentTime);
+                dongGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
+                dong.start(audioContext.currentTime);
+                dong.stop(audioContext.currentTime + 1);
+            }, 400);
+        }
+        
+        function playPauseGong() {
+            if (!soundEnabled || !audioContext) return;
+            [523, 659, 784].forEach((freq, i) => {
+                setTimeout(() => {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    osc.frequency.value = freq;
+                    osc.type = 'sine';
+                    gain.gain.setValueAtTime(0.4, audioContext.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.5);
+                    osc.start(audioContext.currentTime);
+                    osc.stop(audioContext.currentTime + 1.5);
+                }, i * 300);
+            });
+        }
+        
+        function speak(text) {
+            if (!soundEnabled || !('speechSynthesis' in window)) return;
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'de-DE';
+            utterance.rate = 0.9;
+            utterance.pitch = 1;
+            utterance.volume = 1;
+            const voices = speechSynthesis.getVoices();
+            const germanVoice = voices.find(v => v.lang.startsWith('de'));
+            if (germanVoice) utterance.voice = germanVoice;
+            speechSynthesis.speak(utterance);
+        }
+        
+        function announceReady(tourName) {
+            playDingDong();
+            setTimeout(() => speak(`${tourName} Tour ist ready. Gute Fahrt!`), 1500);
+        }
+
+        // PAUSEN FUNKTION
+        function checkPause() {
+            const now = new Date();
+            const currentTime = now.getHours() * 60 + now.getMinutes();
+            const pauseStart = 3 * 60 + 30, pauseEnd = 3 * 60 + 45;
+            const overlay = document.getElementById('pauseOverlay');
+            
+            if (currentTime >= pauseStart && currentTime < pauseEnd) {
+                overlay.classList.add('active');
+                if (!pauseGongPlayed) {
+                    pauseGongPlayed = true;
+                    playPauseGong();
+                    setTimeout(() => speak('Pause! Gönnt euch eine wohlverdiente Erholung.'), 2000);
+                }
+                document.getElementById('pauseTime').textContent = now.toLocaleTimeString('de-CH', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+                const progress = ((currentTime - pauseStart) / (pauseEnd - pauseStart)) * 100;
+                document.getElementById('pauseProgressBar').style.width = progress + '%';
+            } else {
+                overlay.classList.remove('active');
+                pauseGongPlayed = false;
+            }
+        }
+
+        // MODE FUNKTIONEN
+        function getCurrentMode() {
+            if (manualMode) return manualMode;
+            const now = new Date();
+            const currentTime = now.getHours() * 60 + now.getMinutes();
+            return (currentTime >= 450 && currentTime < 720) ? 'nachlieferung' : 'touren';
+        }
+
+        function toggleModeManual() {
+            manualMode = getCurrentMode() === 'touren' ? 'nachlieferung' : 'touren';
+            updateMode();
+            setTimeout(() => { manualMode = null; updateMode(); }, 30000);
+        }
+
+        function updateMode() {
+            const mode = getCurrentMode();
+            document.getElementById('layoutTouren').classList.toggle('active', mode === 'touren');
+            document.getElementById('layoutNachlieferung').classList.toggle('active', mode === 'nachlieferung');
+            document.getElementById('modeName').textContent = (mode === 'nachlieferung' ? '📋 Nachlieferungen' : '🚚 Touren Status') + (manualMode ? ' (manuell)' : '');
+        }
+
+        async function checkAutoReset() {
+            const now = new Date();
+            const currentTime = now.getHours() * 60 + now.getMinutes();
+            const today = now.toDateString();
+            if (currentTime >= 720 && currentTime < 725 && lastResetCheck !== today) {
+                lastResetCheck = today;
+                const tourenDoc = await db.collection('settings').doc('touren').get();
+                if (tourenDoc.exists) {
+                    const touren = tourenDoc.data().list;
+                    touren.forEach(t => t.status = 'kommissionieren');
+                    await db.collection('settings').doc('touren').set({list: touren});
+                }
+                const ranglisteDoc = await db.collection('settings').doc('rangliste').get();
+                if (ranglisteDoc.exists) {
+                    const rangliste = ranglisteDoc.data().list;
+                    rangliste.forEach(r => { r.abwesend = false; r.kunde = ''; });
+                    await db.collection('settings').doc('rangliste').set({list: rangliste});
+                }
+            }
+        }
+
+        function renderTouren(touren) {
+            const grid = document.getElementById('tourGrid');
+            
+            // Check for status change to "ready"
+            touren.forEach(tour => {
+                if (tour && tour.name) {
+                    const prevStatus = previousTourenStatus[tour.name];
+                    if (prevStatus && prevStatus !== 'ready' && tour.status === 'ready') {
+                        console.log(`Tour ${tour.name} ist jetzt READY!`);
+                        announceReady(tour.name);
+                    }
+                    previousTourenStatus[tour.name] = tour.status;
+                }
+            });
+            
+            let html = '';
+            for (let i = 0; i < 12; i++) {
+                const tour = touren[i];
+                if (tour && tour.name) {
+                    const statusText = tour.status === 'kommissionieren' ? 'KOMMISSIONIEREN' : tour.status === 'ready' ? 'READY' : tour.status === 'unterwegs' ? 'UNTERWEGS' : 'ERLEDIGT';
+                    const lieferscheinHtml = tour.status === 'ready' ? '<div class="lieferschein-notice">📄 Lieferscheine bereit</div>' : '';
+                    html += `<div class="tour-card status-${tour.status}"><div class="tour-name">${tour.name}</div><div class="driver-name">${tour.fahrer || '-'}</div><span class="tour-status-badge badge-${tour.status}">${statusText}</span>${lieferscheinHtml}</div>`;
+                } else {
+                    html += `<div class="tour-card empty"></div>`;
+                }
+            }
+            grid.innerHTML = html;
+            renderUnterwegsTouren(touren);
+        }
+
+        function renderUnterwegsTouren(touren) {
+            const grid = document.getElementById('unterwegsGrid');
+            const unterwegs = touren.filter(t => t && t.status === 'unterwegs');
+            if (unterwegs.length === 0) {
+                grid.innerHTML = `<div class="feierabend-message"><div class="icon">🎉</div><h2>Schönen Feierabend!</h2><p>Alle Touren sind erledigt.</p></div>`;
+                return;
+            }
+            grid.innerHTML = unterwegs.map(tour => `<div class="unterwegs-card"><div class="tour-icon">🚚</div><div class="tour-info"><div class="tour-name">${tour.name}</div><div class="driver-name">${tour.fahrer || '-'}</div></div><span class="status-badge">UNTERWEGS</span></div>`).join('');
+        }
+
+        function renderRangliste(rangliste) {
+            const grid = document.getElementById('rankingGrid');
+            if (!rangliste || rangliste.length === 0) { grid.innerHTML = '<div class="loading">Keine Daten</div>'; return; }
+            grid.innerHTML = rangliste.filter(item => !item.excluded).map((item, index) => {
+                const rankClass = index < 3 ? `rank-${index + 1}` : 'rank-other';
+                const abwesendBadge = item.abwesend ? '<span class="abwesend-badge">🏠 Abwesend</span>' : '';
+                const kundeHtml = item.kunde ? `<div class="kunde-info"><span class="kunde-name">🚨 ${item.kunde}</span></div>` : '';
+                return `<div class="ranking-card ${rankClass}${item.abwesend ? ' abwesend' : ''}"><span class="rank-badge">${index + 1}</span><div class="ranking-info"><div class="ranking-driver-name">${item.fahrer}</div>${kundeHtml}</div>${abwesendBadge}</div>`;
+            }).join('');
+        }
+
+        // NEWS CAROUSEL FUNCTIONS
+        function buildCarouselSlides() {
+            const slides = [];
+            
+            // Weather slide first
+            if (weatherData) {
+                slides.push({ type: 'weather', data: weatherData });
+            }
+            
+            // News slides
+            newsItems.forEach(item => {
+                slides.push({ type: 'news', data: item });
+            });
+            
+            return slides;
+        }
+        
+        function renderCarousel(containerId, indicatorId) {
+            const carousel = document.getElementById(containerId);
+            const indicators = document.getElementById(indicatorId);
+            const slides = buildCarouselSlides();
+            
+            if (slides.length === 0) {
+                carousel.innerHTML = '<div class="loading">Keine News</div>';
+                indicators.innerHTML = '';
+                return;
+            }
+            
+            let html = '';
+            slides.forEach((slide, index) => {
+                if (slide.type === 'weather') {
+                    html += buildWeatherSlide(slide.data, index);
+                } else {
+                    html += buildNewsSlide(slide.data, index);
+                }
+            });
+            carousel.innerHTML = html;
+            
+            // Indicators
+            indicators.innerHTML = slides.map((_, i) => 
+                `<div class="slide-indicator${i === 0 ? ' active' : ''}" data-index="${i}"></div>`
+            ).join('');
+            
+            // Set first slide active
+            const firstSlide = carousel.querySelector('.news-slide');
+            if (firstSlide) firstSlide.classList.add('active');
+        }
+        
+        function buildWeatherSlide(data, index) {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('de-CH', { weekday: 'long', day: 'numeric', month: 'long' });
+            const weatherIcon = getWeatherIcon(data.code);
+            const weatherDesc = getWeatherDesc(data.code);
+            
+            return `
+                <div class="news-slide weather-slide" data-index="${index}">
+                    <div class="slide-image">
+                        <div class="weather-date">${dateStr}</div>
+                        <div class="weather-main">
+                            <span class="weather-icon-large">${weatherIcon}</span>
+                            <div>
+                                <div class="weather-temp-large">${Math.round(data.temp)}°C</div>
+                                <div class="weather-desc-large">${weatherDesc}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slide-content">
+                        <div class="weather-details">
+                            <div class="weather-detail-item">
+                                <span class="detail-icon">☀️</span>
+                                <div class="detail-text">
+                                    <div class="detail-label">Sonne</div>
+                                    <div class="detail-value">${data.sunshine || '0'} h</div>
+                                </div>
+                            </div>
+                            <div class="weather-detail-item">
+                                <span class="detail-icon">🌅</span>
+                                <div class="detail-text">
+                                    <div class="detail-label">Aufgang</div>
+                                    <div class="detail-value">${data.sunrise || '--:--'}</div>
+                                </div>
+                            </div>
+                            <div class="weather-detail-item">
+                                <span class="detail-icon">💨</span>
+                                <div class="detail-text">
+                                    <div class="detail-label">Wind</div>
+                                    <div class="detail-value">${data.wind || '0'} km/h</div>
+                                </div>
+                            </div>
+                            <div class="weather-detail-item">
+                                <span class="detail-icon">🌇</span>
+                                <div class="detail-text">
+                                    <div class="detail-label">Untergang</div>
+                                    <div class="detail-value">${data.sunset || '--:--'}</div>
+                                </div>
+                            </div>
+                            <div class="weather-detail-item">
+                                <span class="detail-icon">💧</span>
+                                <div class="detail-text">
+                                    <div class="detail-label">Regen</div>
+                                    <div class="detail-value">${data.rain || '0'} mm</div>
+                                </div>
+                            </div>
+                            <div class="weather-detail-item">
+                                <span class="detail-icon">💦</span>
+                                <div class="detail-text">
+                                    <div class="detail-label">Feuchte</div>
+                                    <div class="detail-value">${data.humidity || '0'}%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function buildNewsSlide(item, index) {
+            const imageHtml = item.bild 
+                ? `<img src="${item.bild}" alt="">` 
+                : `<span class="placeholder">📰</span>`;
+            
+            return `
+                <div class="news-slide" data-index="${index}">
+                    <div class="slide-image">${imageHtml}</div>
+                    <div class="slide-content">
+                        <div class="slide-title">${item.titel}</div>
+                        <div class="slide-text">${item.text}</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function getWeatherIcon(code) {
+            if (code === 0) return '☀️';
+            if (code <= 3) return '⛅';
+            if (code <= 49) return '🌫️';
+            if (code <= 59) return '🌧️';
+            if (code <= 69) return '🌨️';
+            if (code <= 79) return '❄️';
+            return '⛈️';
+        }
+        
+        function getWeatherDesc(code) {
+            if (code === 0) return 'Sonnig';
+            if (code <= 3) return 'Teilweise bewölkt';
+            if (code <= 49) return 'Nebel';
+            if (code <= 59) return 'Leichter Regen';
+            if (code <= 69) return 'Regen';
+            if (code <= 79) return 'Schnee';
+            return 'Gewitter';
+        }
+        
+        function nextSlide() {
+            const carousels = ['newsCarouselTouren', 'newsCarouselNachlieferung'];
+            const indicators = ['slideIndicatorsTouren', 'slideIndicatorsNachlieferung'];
+            const slides = buildCarouselSlides();
+            
+            if (slides.length <= 1) return;
+            
+            const prevIndex = currentSlideIndex;
+            currentSlideIndex = (currentSlideIndex + 1) % slides.length;
+            
+            carousels.forEach((carouselId, i) => {
+                const carousel = document.getElementById(carouselId);
+                const indicatorContainer = document.getElementById(indicators[i]);
+                
+                if (!carousel) return;
+                
+                const allSlides = carousel.querySelectorAll('.news-slide');
+                const allIndicators = indicatorContainer ? indicatorContainer.querySelectorAll('.slide-indicator') : [];
+                
+                allSlides.forEach(slide => {
+                    slide.classList.remove('active', 'exit');
+                });
+                
+                if (allSlides[prevIndex]) allSlides[prevIndex].classList.add('exit');
+                if (allSlides[currentSlideIndex]) allSlides[currentSlideIndex].classList.add('active');
+                
+                if (allIndicators && allIndicators.length) {
+                    allIndicators.forEach(function(ind, idx) {
+                        if (idx === currentSlideIndex) {
+                            ind.classList.add('active');
+                        } else {
+                            ind.classList.remove('active');
+                        }
+                    });
+                }
+            });
+        }
+        
+        function startCarousel() {
+            if (carouselInterval) clearInterval(carouselInterval);
+            carouselInterval = setInterval(nextSlide, 30000); // 30 Sekunden
+        }
+        
+        function updateNewsCarousel(news) {
+            newsItems = news || [];
+            renderCarousel('newsCarouselTouren', 'slideIndicatorsTouren');
+            renderCarousel('newsCarouselNachlieferung', 'slideIndicatorsNachlieferung');
+            currentSlideIndex = 0;
+        }
+
+        function setupRealtimeListeners() {
+            db.collection('settings').doc('touren').get().then(doc => {
+                if (doc.exists) {
+                    (doc.data().list || []).forEach(tour => {
+                        if (tour && tour.name) previousTourenStatus[tour.name] = tour.status;
+                    });
+                }
+            });
+            db.collection('settings').doc('touren').onSnapshot(doc => { if (doc.exists) renderTouren(doc.data().list || []); });
+            db.collection('settings').doc('rangliste').onSnapshot(doc => { if (doc.exists) renderRangliste(doc.data().list || []); });
+            db.collection('settings').doc('news').onSnapshot(doc => { 
+                if (doc.exists) {
+                    updateNewsCarousel(doc.data().list || []);
+                }
+            });
+            db.collection('settings').doc('geburtstage').onSnapshot(doc => { 
+                if (doc.exists) geburtstage = doc.data().list || [];
+            });
+            db.collection('settings').doc('termine').onSnapshot(doc => { 
+                if (doc.exists) {
+                    termine = doc.data().list || [];
+                    checkTicker();
+                }
+            });
+            db.collection('settings').doc('wiederkehrend').onSnapshot(doc => { 
+                if (doc.exists) {
+                    wiederkehrend = doc.data().list || [];
+                    checkTicker();
+                }
+            });
+        }
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent = now.toLocaleTimeString('de-CH', {hour:'2-digit',minute:'2-digit'});
+            document.getElementById('date').textContent = now.toLocaleDateString('de-CH', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
+            updateMode();
+            checkAutoReset();
+            checkPause();
+        }
+
+        async function loadWeather() {
+            try {
+                const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=47.55&longitude=8.90&current=temperature_2m,weather_code,relative_humidity_2m,wind_speed_10m&hourly=temperature_2m,weather_code&daily=sunrise,sunset,sunshine_duration,precipitation_sum&timezone=Europe/Zurich&forecast_days=1');
+                const data = await response.json();
+                const code = data.current.weather_code;
+                
+                // Update header weather
+                document.getElementById('weatherTemp').textContent = `${Math.round(data.current.temperature_2m)}°C`;
+                document.getElementById('weatherIcon').textContent = code === 0 ? '☀️' : code <= 3 ? '⛅' : code <= 49 ? '🌫️' : code <= 69 ? '🌧️' : code <= 79 ? '🌨️' : '⛈️';
+                document.getElementById('weatherDesc').textContent = code === 0 ? 'Sonnig' : code <= 3 ? 'Teilweise bewölkt' : code <= 49 ? 'Nebel' : code <= 69 ? 'Regen' : code <= 79 ? 'Schnee' : 'Gewitter';
+                const currentHour = new Date().getHours();
+                document.getElementById('weatherForecast').innerHTML = [currentHour + 2, currentHour + 4, currentHour + 6].map(h => h % 24).map(hour => `<div class="forecast-item"><div>${hour.toString().padStart(2, '0')}:00</div><div class="temp">${Math.round(data.hourly.temperature_2m[hour])}°</div></div>`).join('');
+                
+                // Store detailed weather for carousel
+                var sunriseRaw = (data.daily && data.daily.sunrise && data.daily.sunrise[0]) ? data.daily.sunrise[0] : '';
+                var sunsetRaw = (data.daily && data.daily.sunset && data.daily.sunset[0]) ? data.daily.sunset[0] : '';
+                var sunrise = sunriseRaw ? sunriseRaw.split('T')[1].substring(0, 5) : '--:--';
+                var sunset = sunsetRaw ? sunsetRaw.split('T')[1].substring(0, 5) : '--:--';
+                var sunshine = (data.daily && data.daily.sunshine_duration && data.daily.sunshine_duration[0]) ? Math.round(data.daily.sunshine_duration[0] / 3600) : 0;
+                var rain = (data.daily && data.daily.precipitation_sum && data.daily.precipitation_sum[0]) ? data.daily.precipitation_sum[0] : 0;
+                
+                weatherData = {
+                    temp: data.current.temperature_2m,
+                    code: code,
+                    humidity: data.current.relative_humidity_2m,
+                    wind: Math.round(data.current.wind_speed_10m),
+                    rain: rain,
+                    sunrise: sunrise,
+                    sunset: sunset,
+                    sunshine: sunshine,
+                    hourly: data.hourly.temperature_2m,
+                    hourlyCode: data.hourly.weather_code
+                };
+                
+                // Re-render carousel with weather data
+                updateNewsCarousel(newsItems);
+                
+            } catch (e) { 
+                document.getElementById('weatherDesc').textContent = 'Nicht verfügbar'; 
+            }
+        }
+
+        if ('speechSynthesis' in window) { speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices(); }
+        
+        // BIRTHDAY FUNCTIONS
+        function getTodayBirthday() {
+            const now = new Date();
+            const today = { tag: now.getDate(), monat: now.getMonth() + 1 };
+            return geburtstage.find(g => g.tag === today.tag && g.monat === today.monat);
+        }
+        
+        function checkBirthday() {
+            const now = new Date();
+            const hour = now.getHours();
+            const minutes = now.getMinutes();
+            
+            const birthday = getTodayBirthday();
+            if (!birthday) {
+                document.getElementById('birthdayOverlay').classList.remove('active');
+                birthdayShowing = false;
+                return;
+            }
+            
+            // Um 03:00 für 5 Minuten anzeigen (03:00 - 03:05)
+            const shouldShow = hour === 3 && minutes < 5;
+            
+            if (shouldShow && !birthdayShowing) {
+                document.getElementById('birthdayName').textContent = birthday.name;
+                document.getElementById('birthdayOverlay').classList.add('active');
+                birthdayShowing = true;
+                // Song nur einmal abspielen
+                if (!birthdaySongPlaying) {
+                    birthdaySongPlaying = true;
+                    playHappyBirthdaySong();
+                }
+            } else if (!shouldShow && birthdayShowing) {
+                document.getElementById('birthdayOverlay').classList.remove('active');
+                birthdayShowing = false;
+                birthdaySongPlaying = false;
+            }
+        }
+        
+        function playHappyBirthdaySong() {
+            if (!soundEnabled || !audioContext) return;
+            
+            // Happy Birthday Melodie - komplette erste Strophe (~1 Minute)
+            // Noten: C C D C F E | C C D C G F | C C C' A F E D | Bb Bb A F G F
+            const tempo = 0.4; // Sekunden pro Grundschlag
+            const notes = [
+                // "Happy birthday to you"
+                {freq: 262, dur: 0.75}, {freq: 262, dur: 0.25}, {freq: 294, dur: 1}, {freq: 262, dur: 1}, {freq: 349, dur: 1}, {freq: 330, dur: 2},
+                // "Happy birthday to you"  
+                {freq: 262, dur: 0.75}, {freq: 262, dur: 0.25}, {freq: 294, dur: 1}, {freq: 262, dur: 1}, {freq: 392, dur: 1}, {freq: 349, dur: 2},
+                // "Happy birthday dear [Name]"
+                {freq: 262, dur: 0.75}, {freq: 262, dur: 0.25}, {freq: 523, dur: 1}, {freq: 440, dur: 1}, {freq: 349, dur: 1}, {freq: 330, dur: 1}, {freq: 294, dur: 2},
+                // "Happy birthday to you"
+                {freq: 466, dur: 0.75}, {freq: 466, dur: 0.25}, {freq: 440, dur: 1}, {freq: 349, dur: 1}, {freq: 392, dur: 1}, {freq: 349, dur: 2},
+            ];
+            
+            // Wiederhole das Lied 3x für ca. 1 Minute
+            let time = audioContext.currentTime;
+            for (let repeat = 0; repeat < 3; repeat++) {
+                notes.forEach(note => {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    osc.frequency.value = note.freq;
+                    osc.type = 'triangle'; // Weicherer Sound
+                    const noteDur = note.dur * tempo;
+                    gain.gain.setValueAtTime(0.25, time);
+                    gain.gain.setValueAtTime(0.25, time + noteDur * 0.8);
+                    gain.gain.exponentialRampToValueAtTime(0.01, time + noteDur);
+                    osc.start(time);
+                    osc.stop(time + noteDur);
+                    time += noteDur;
+                });
+                time += 1; // Pause zwischen Wiederholungen
+            }
+        }
+        
+        // TICKER FUNCTIONS
+        function checkTicker() {
+            const now = new Date();
+            const today = now.toISOString().split('T')[0]; // YYYY-MM-DD
+            const todayWeekday = now.getDay(); // 0=Sonntag, 1=Montag, etc.
+            
+            // Einmalige Termine für heute
+            const todayTermine = termine.filter(t => t.datum === today);
+            
+            // Wiederkehrende Termine prüfen
+            const todayWiederkehrend = wiederkehrend.filter(w => {
+                if (w.wochentag !== todayWeekday) return false;
+                if (today < w.von || today > w.bis) return false;
+                return true;
+            });
+            
+            const allTexts = [...todayTermine.map(t => t.text), ...todayWiederkehrend.map(w => w.text)];
+            
+            if (allTexts.length > 0) {
+                const tickerText = allTexts.join('     ★     ');
+                document.getElementById('tickerText').textContent = tickerText + '     ★     ' + tickerText;
+                document.getElementById('newsTicker').classList.add('active');
+            } else {
+                document.getElementById('newsTicker').classList.remove('active');
+            }
+        }
+        
+        setupRealtimeListeners();
+        updateClock();
+        loadWeather();
+        startCarousel();
+        setInterval(updateClock, 1000);
+        setInterval(loadWeather, 600000);
+        setInterval(checkBirthday, 5000);
+        setInterval(checkTicker, 60000);
+    </script>
+</body>
+</html>
